@@ -1,0 +1,8 @@
+
+import pandas as pd
+
+
+#dataframe
+
+df = pd.read_csv('IMDB Dataset.csv')
+text = df.head()
