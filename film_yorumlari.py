@@ -1,43 +1,36 @@
 
 import pandas as pd
-from tqdm import tqdm
-from bs4 import BeautifulSoup
-
-
-
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import confusion_matrix
 #dataframe
 
 df = pd.read_csv('IMDB Dataset.csv')
-text = df.head()
+y = df.sentiment.replace({"positive":1,"negative":0})
+x = df.review
+
+bag = CountVectorizer()
+X = bag.fit_transform(x)
+
+X_train, X_test, y_train, y_test = train_test_split(X, y)
+
+clf = RandomForestClassifier(n_jobs=-1)
+clf.fit(X_train, y_train)
+
+preds = clf.predict(X_test)
+
+cm = confusion_matrix(y_test, preds)
+
+test1 = "I really did not enjoy watching this , Very disappointed"
+test2 = "What a wanderful movie, I enjoyed wathcing this witch my kids"
+
+pre_1 = clf.predict(bag.transform([test1]))
+pre_2 = clf.predict(bag.transform([test2]))
+
+print(pre_1)
+print(pre_2)
 
 
-def removeHTML(text):
-    soup = BeautifulSoup(text, 'html.parser')
-    return soup.get_text()
 
 
-maxObs = 20
-observation = ''
-
-for n in range(maxObs):
-    observation += removeHTML(df.iloc[n][0])
-
-
-observationClean = ','.join(i.lower() for i in observation.split() if i.isalnum())
-
-setOfWords = set(observationClean.split(','))
-
-dictList = []
-for n in tqdm(range(len(df))):
-    observation = removeHTML(df.iloc[n][0])
-    clean = ','.join(i.lower() for i in observation.split() if i.isalnum())
-    dictOfWords = dict.fromkeys(setOfWords, 0)
-    for word in clean.split(','):
-        if word in dictOfWords:
-            dictOfWords[word] += 1
-    dictList.append(dictOfWords)
-
-
-pd.DataFrame(dictList).sample(10)
-
-    
